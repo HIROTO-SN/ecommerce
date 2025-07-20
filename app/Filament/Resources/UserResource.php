@@ -34,8 +34,8 @@ class UserResource extends Resource {
             ->unique( ignoreRecord: true )
             ->required(),
             DateTimePicker::make( 'email_verified_at' )
-            ->label( 'Email Verified At' )
-            ->default( now() ),
+            ->label( 'Email Verified At' ),
+            // ->default( fn () => now() ),
             TextInput::make( 'password' )
             ->password()
             ->dehydrated( fn( $state ) => filled( $state ) )

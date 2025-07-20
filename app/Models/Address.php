@@ -19,11 +19,11 @@ class Address extends Model {
         'state',
         'zip_code',
     ];
-    
+
     public function order() {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo( Order::class );
     }
-    
+
     public function getFullNameAttricute() {
         return "{$this->first_name} {$this->last_name}";
     }
