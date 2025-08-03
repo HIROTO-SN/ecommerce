@@ -3,20 +3,18 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
-use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use Filament\Forms;
-use Filament\Forms\Components;
 use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class OrderResource extends Resource {
     protected static ?string $model = Order::class;
@@ -28,19 +26,19 @@ class OrderResource extends Resource {
         ->schema( [
             Group::make()->schema( [
                 Section::make( 'Order Information' )->schema( [
-                    Forms\Components\Select::make( 'user_id' )
+                    Select::make( 'user_id' )
                     ->label( 'Customer' )
                     ->relationship( 'user', 'name' )
                     ->searchable()
                     ->preload()
                     ->required(),
-                    Forms\Components\Select::make( 'payment_method' )
+                    Select::make( 'payment_method' )
                     ->options( [
                         'stripe' => 'Stripe',
                         'cod' => 'Cash on Delivery',
                     ] )
                     ->required(),
-                    Forms\Components\Select::make( 'payment_status' )
+                    Select::make( 'payment_status' )
                     ->options( [
                         'pending' => 'Pending',
                         'paid' => 'Paid',
@@ -48,7 +46,7 @@ class OrderResource extends Resource {
                     ] )
                     ->required()
                     ->default( 'pending' ),
-                    Forms\Components\Radio::make( 'status' )
+                    Radio::make( 'status' )
                     ->default( 'new' )
                     ->inline()
                     ->required()
@@ -59,7 +57,7 @@ class OrderResource extends Resource {
                         'delivered' => 'Delivered',
                         'cancelled' => 'Cancelled'
                     ] ),
-                    Forms\Components\Select::make( 'currency' )
+                    Select::make( 'currency' )
                     ->default( 'usd' )
                     ->required()
                     ->options( [
@@ -67,7 +65,27 @@ class OrderResource extends Resource {
                         'usd' => 'USD',
                         'eur' => 'EUR',
                     ] ),
+                    Select::make( 'shipping_method' )
+                    ->options( [
+                        'fedex' => 'FedEx',
+                        'ups' => 'UPS',
+                        'dhl' => 'DHL',
+                        'usps' => 'USPS',
+                    ] ),
+                    Textarea::make( 'notes' )
+                    ->columnSpanFull()
+                ] )->columns( 2 ),
 
+                Section::make( 'Order Items' )->schema( [
+                    Repeater::make( 'items' )
+                    ->relationship()
+                    ->schema( [
+                        Select::make( 'product_id' )
+                        ->relationship( 'product', 'name' )
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                    ] )
                 ] )
             ] )->columnSpanFull()
         ] );
