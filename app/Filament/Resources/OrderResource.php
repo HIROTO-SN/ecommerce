@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
 use App\Models\Order;
+use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Repeater;
@@ -11,6 +12,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -85,7 +87,25 @@ class OrderResource extends Resource {
                         ->searchable()
                         ->preload()
                         ->required()
-                    ] )
+                        ->distinct()
+                        ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                        ->columnSpan( 4 ),
+                        TextInput::make( 'quantity' )
+                        ->numeric()
+                        ->required()
+                        ->default( 1 )
+                        ->minValue( 1 )
+                        ->columnSpan( 2 ),
+                        TextInput::make( 'unit_amount' )
+                        ->numeric()
+                        ->required()
+                        ->disabled()
+                        ->columnSpan( 3 ),
+                        TextInput::make( 'total_amount' )
+                        ->numeric()
+                        ->required()
+                        ->columnSpan( 3 )
+                    ] )->columns( 12 )
                 ] )
             ] )->columnSpanFull()
         ] );
