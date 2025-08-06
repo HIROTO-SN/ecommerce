@@ -14,6 +14,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -89,21 +91,28 @@ class OrderResource extends Resource {
                         ->required()
                         ->distinct()
                         ->disableOptionsWhenSelectedInSiblingRepeaterItems()
-                        ->columnSpan( 4 ),
+                        ->columnSpan( 4 )
+                        ->reactive()
+                        ->afterStateUpdated( fn ( $state, Set $set ) => $set( 'unit_amount', Product::find( $state )?->price ?? 0 ) )
+                        ->afterStateUpdated( fn ( $state, Set $set ) => $set( 'total_amount', Product::find( $state )?->price ?? 0 ) ),
                         TextInput::make( 'quantity' )
                         ->numeric()
                         ->required()
                         ->default( 1 )
                         ->minValue( 1 )
-                        ->columnSpan( 2 ),
+                        ->columnSpan( 2 )
+                        ->live( onBlur: true )
+                        ->afterStateUpdated( fn ( $state, Set $set, Get $get ) => $set( 'total_amount', $state*$get( 'unit_amount' ) ) ),
                         TextInput::make( 'unit_amount' )
                         ->numeric()
                         ->required()
                         ->disabled()
+                        ->dehydrated()
                         ->columnSpan( 3 ),
                         TextInput::make( 'total_amount' )
                         ->numeric()
                         ->required()
+                        ->dehydrated()
                         ->columnSpan( 3 )
                     ] )->columns( 12 )
                 ] )
