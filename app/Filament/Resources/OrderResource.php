@@ -5,14 +5,11 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Models\Order;
 use App\Models\Product;
-use Illuminate\Support\Number;
-use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -22,6 +19,10 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -190,14 +191,25 @@ class OrderResource extends Resource {
                 'cancelled' => 'Cancelled'
             ] )
             ->sortable()
-            ->searchable()
+            ->searchable(),
+            TextColumn::make('created_at')
+            ->dateTime()
+            ->toggleable(isToggledHiddenByDefault: true)
+            ->sortable(),
+            TextColumn::make('updated_at')
+            ->dateTime()
+            ->toggleable(isToggledHiddenByDefault: true)
+            ->sortable(),
         ] )
         ->filters( [
             //
         ] )
         ->actions( [
-            Tables\Actions\ViewAction::make(),
-            Tables\Actions\EditAction::make(),
+            ActionGroup::make( [
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ] )
         ] )
         ->bulkActions( [
             Tables\Actions\BulkActionGroup::make( [
@@ -213,6 +225,16 @@ class OrderResource extends Resource {
         return [
             //
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return static::getModel()::count() > 10 ? 'success': 'danger';
     }
 
     public static function getPages(): array {
