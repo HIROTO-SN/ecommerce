@@ -19,14 +19,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
-class ProductResource extends Resource
- {
+class ProductResource extends Resource {
     protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
-    public static function form( Form $form ): Form
- {
+    protected static ?int $navigationSort = 4;
+
+    public static function form( Form $form ): Form {
         return $form
         ->schema( [
             Group::make()->schema( [
@@ -94,8 +94,7 @@ class ProductResource extends Resource
         ] )->columns( 3 );
     }
 
-    public static function table( Table $table ): Table
- {
+    public static function table( Table $table ): Table {
         return $table
         ->columns( [
             Tables\Columns\TextColumn::make( 'name' )
@@ -147,15 +146,13 @@ class ProductResource extends Resource
         ] );
     }
 
-    public static function getRelations(): array
- {
+    public static function getRelations(): array {
         return [
             //
         ];
     }
 
-    public static function getPages(): array
- {
+    public static function getPages(): array {
         return [
             'index' => Pages\ListProducts::route( '/' ),
             'create' => Pages\CreateProduct::route( '/create' ),
