@@ -27,7 +27,7 @@ class CartManagement {
                 $cart_items[] = [
                     'product_id' =>$product_id,
                     'name' => $product->name,
-                    'image' => $product->images[ 0 ],
+                    'image' => $product->image[ 0 ],
                     'quantity' => 1,
                     'unit_amount' => $product->price,
                     'total_amount' => $product->price,
@@ -54,7 +54,7 @@ class CartManagement {
     // get all cart items from cookie
     static public function getCartItemsFromCookie() {
         $cart_items = json_decode( Cookie::get( 'cart_items' ), true );
-        if ( $cart_items ) {
+        if ( !is_array( $cart_items ) ) {
             $cart_items = [];
         }
 
