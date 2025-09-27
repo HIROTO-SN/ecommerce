@@ -2,12 +2,30 @@
 
 namespace App\Livewire\Auth;
 
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
-class LoginPage extends Component
-{
-    public function render()
-    {
-        return view('livewire.auth.login-page');
+#[ Title( 'Login' ) ]
+
+class LoginPage extends Component {
+
+    public $email;
+    public $password;
+
+    public function render() {
+        return view( 'livewire.auth.login-page' );
+    }
+
+    public function save() {
+        $this->validate( [
+            'email' => 'required|email|exists:users,email|max:255',
+            'password' => 'required|min:6|max:255',
+        ] );
+
+        if ( !auth()->attempt( [ 'email'=>$this->email, 'password'=>$this->password ] ) ) {
+            session()->flash( 'error', 'Invalid credentials' );
+            return;
+        }
+        return redirect()->intended();
     }
 }
