@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider {
     public function boot(): void {
         FilamentAsset::register( [
             // Local asset build using Vite
-            Js::make( 'sweetalert2', Vite::asset( 'resources/js/sweetalert2.js' ) ),
+            // Js::make( 'sweetalert2', Vite::asset( 'resources/js/sweetalert2.js' ) ),
 
             // Or via CDN
             Js::make( 'sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11' ),
