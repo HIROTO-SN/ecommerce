@@ -8,11 +8,16 @@
                     </div>
                     <!-- Form -->
                     <form wire:submit.prevent="save">
+                        @if(session('error'))
+                        <div class="mt-2 mb-4 bg-red-500 text-sm text-white rounded-lg p-4" role="alert" tabindex="-1"
+                            aria-labelledby="hs-solid-color-danger-label">
+                            {{ session('error') }}
+                        </div>
+                        @endif
                         <div class="grid gap-y-4">
                             <div>
                                 <div class="flex justify-between items-center">
                                     <label for="password" class="block text-sm mb-2 dark:text-white">Password</label>
-
                                 </div>
                                 <div class="relative">
                                     <input type="password" id="password" wire:model="password"
