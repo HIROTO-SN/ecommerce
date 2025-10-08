@@ -23,6 +23,13 @@ class CheckoutPage extends Component {
     public $zip_code;
     public $payment_method;
 
+    public function mount() {
+        $cart_items = CartManagement::getCartItemsFromCookie();
+        if (count($cart_items) == 0) {
+            return redirect('/products');
+        }
+    }
+
     public function placeOrder() {
 
         $this->validate( [
