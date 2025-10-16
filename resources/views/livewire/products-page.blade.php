@@ -99,23 +99,20 @@
 
                         @foreach ($products as $product)
                         <div class="w-full px-3 mb-6 sm:w-1/2 md:w-1/3" wire:key="{{ $product->id }}">
-                            <div class="border border-gray-300 dark:border-gray-700">
-                                <div class="relative bg-gray-200">
-                                    <a href="/products/{{ $product->slug }}" class="">
+                            <div
+                                class="border border-gray-300 dark:border-gray-700 flex flex-col justify-between h-[420px]">
+                                <div class="relative bg-gray-200 h-56 overflow-hidden">
+                                    <a href="/products/{{ $product->slug }}">
                                         <img src="{{ url('storage', $product->image[0]) }}" alt="{{ $product->name }}"
-                                            class="object-cover w-full h-56 mx-auto ">
+                                            class="object-cover w-full h-full">
                                     </a>
                                 </div>
-                                <div class="p-3 ">
-                                    <div class="flex items-center justify-between gap-2 mb-2">
-                                        <h3 class="text-xl font-medium dark:text-gray-400">
-                                            {{ $product->name }}
-                                        </h3>
-                                    </div>
-                                    <p class="text-lg ">
-                                        <span class="text-green-600 dark:text-green-600">
-                                            {{ Number::currency($product->price, 'USD') }}
-                                        </span>
+                                <div class="p-3 flex-grow">
+                                    <h3 class="text-xl font-medium dark:text-gray-400 line-clamp-2 h-12">
+                                        {{ $product->name }}
+                                    </h3>
+                                    <p class="text-lg text-green-600">
+                                        {{ Number::currency($product->price, 'USD') }}
                                     </p>
                                 </div>
                                 <div class="flex justify-center p-4 border-t border-gray-300 dark:border-gray-700">
