@@ -33,6 +33,8 @@ class SuccessPage extends Component {
                 $latest_order->save();
             }
         }
-        return view( 'livewire.success-page' );
+        return view( 'livewire.success-page', [
+            'order' => $latest_order
+        ] );
     }
 }
