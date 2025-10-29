@@ -3,11 +3,21 @@
 namespace App\Livewire;
 
 use Livewire\Attributes\Title;
+use Livewire\WithFileUploads;
 use Livewire\Component;
 
 #[ Title( 'My Account' ) ]
 
 class MyAccountPage extends Component {
+
+    use WithFileUploads;
+
+    public $photo;
+
+    protected $rules = [
+        'photo' => 'nullable|image|max:2048',
+    ];
+
     public function render() {
         $user = auth()->user();
 
@@ -19,5 +29,9 @@ class MyAccountPage extends Component {
             'recent_orders' => $user->orders()->latest()->take( 5 )->get(),
             'default_address' => $user->orders()->latest()->first()?->address,
         ] );
+    }
+
+    public function updatedPhoto() {
+        dd( $this->photo );
     }
 }

@@ -6,10 +6,30 @@
         <!-- Sidebar -->
         <aside class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6 shadow-sm">
             <div class="flex flex-col items-center mb-6">
-                <img src="{{ $user->avatar_url ?? '/images/default-avatar.png' }}" alt="Profile"
-                    class="w-24 h-24 rounded-full object-cover mb-3">
-                <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">{{ $user->name }}</h2>
+                <div class="relative">
+                    <!-- 画像プレビュー -->
+                    <img src="{{ $photo ? $photo->temporaryUrl() : url('storage/default/default-avatar.png') }}"
+                        alt="Profile"
+                        class="w-24 h-24 rounded-full object-cover mb-3 border border-gray-300 dark:border-gray-700">
+
+                    <!-- 編集アイコン -->
+                    <label for="photo-upload"
+                        class="absolute bottom-0 right-0 bg-gray-800 text-white text-xs px-2 py-1 rounded cursor-pointer hover:bg-gray-700">
+                        Edit
+                    </label>
+                    <input id="photo-upload" type="file" wire:model="photo" class="hidden" accept="image/*">
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mt-2">{{ $user->name }}</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
+
+                @if (session()->has('message'))
+                <p class="text-green-600 text-sm mt-2">{{ session('message') }}</p>
+                @endif
+
+                @error('photo')
+                <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
+                @enderror
             </div>
 
             <nav class="space-y-2">
