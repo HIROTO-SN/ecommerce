@@ -8,7 +8,7 @@
             <div class="flex flex-col items-center mb-6">
                 <div class="relative">
                     <!-- 画像プレビュー -->
-                    <img src="{{ $photo ? $photo->temporaryUrl() : url('storage/default/default-avatar.png') }}"
+                    <img src="{{ $photo ? url('storage', $photo) : url('storage/default/default-avatar.png') }}"
                         alt="Profile"
                         class="w-24 h-24 rounded-full object-cover mb-3 border border-gray-300 dark:border-gray-700">
 
@@ -22,14 +22,6 @@
 
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mt-2">{{ $user->name }}</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
-
-                @if (session()->has('message'))
-                <p class="text-green-600 text-sm mt-2">{{ session('message') }}</p>
-                @endif
-
-                @error('photo')
-                <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
-                @enderror
             </div>
 
             <nav class="space-y-2">
@@ -139,3 +131,5 @@
         </section>
     </div>
 </div>
+
+@livewireAlerts
