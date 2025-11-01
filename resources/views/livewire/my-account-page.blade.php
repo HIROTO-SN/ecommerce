@@ -1,38 +1,43 @@
-<div class="w-full max-w-[85rem] py-10 px-4 sm:px-6 lg:px-8 mx-auto">
-    <h1 class="text-4xl font-bold text-slate-500 dark:text-slate-100 mb-8">My Page</h1>
+<div class="w-full max-w-6xl py-10 px-4 sm:px-6 lg:px-8 mx-auto">
+    <h1 class="text-4xl font-bold text-slate-500 dark:text-slate-100 mb-8 text-center">My Page</h1>
 
-    <div class="grid md:grid-cols-3 gap-6">
+    <!-- Grid layout: Sidebar + Main Content -->
+    <div class="grid md:grid-cols-3 gap-8">
 
         <!-- Sidebar -->
         <aside class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6 shadow-sm">
             <div class="flex flex-col items-center mb-6">
                 <div class="relative">
-                    <!-- 画像プレビュー -->
+                    <!-- Profile photo preview -->
                     <img src="{{ $photo ? url('storage', $photo) : url('storage/default/default-avatar.png') }}"
                         alt="Profile"
                         class="w-24 h-24 rounded-full object-cover mb-3 border border-gray-300 dark:border-gray-700">
 
-                    <!-- 編集アイコン -->
+                    <!-- Edit button for photo -->
                     <label for="photo-upload"
                         class="absolute bottom-0 right-0 bg-gray-800 text-white text-xs px-2 py-1 rounded cursor-pointer hover:bg-gray-700">
                         Edit
                     </label>
                     <input id="photo-upload" type="file" wire:model="photo" class="hidden" accept="image/*">
+
+                    <!-- Loading spinner when uploading -->
+                    <div wire:loading wire:target="photo"
+                        class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
+                        <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    </div>
                 </div>
 
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mt-2">{{ $user->name }}</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
             </div>
 
-            <nav class="space-y-2">
-                <a wire:navigate href="/my-page"
-                    class="flex items-center gap-x-3 px-4 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Overview
-                </a>
+            <!-- Sidebar navigation -->
+            <nav class="space-y-2 w-full">
                 <a wire:navigate href="/my-orders"
                     class="flex items-center gap-x-3 px-4 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
@@ -74,58 +79,92 @@
 
         <!-- Main Content -->
         <section
-            class="md:col-span-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Overview</h2>
+            class="md:col-span-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-8">
+            <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-8">Login and Security</h2>
 
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div
-                    class="p-5 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-center">
-                    <h3 class="text-sm text-gray-600 dark:text-gray-300">Total Orders</h3>
-                    <p class="text-3xl font-bold text-blue-500 mt-1">{{ $orders_count }}</p>
-                </div>
-                <div
-                    class="p-5 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-center">
-                    <h3 class="text-sm text-gray-600 dark:text-gray-300">Wishlist Items</h3>
-                    <p class="text-3xl font-bold text-rose-600 mt-1">0</p>
-                    {{-- <p class="text-3xl font-bold text-rose-600 mt-1">{{ $wishlist_count }}</p> --}}
-                </div>
-                <div
-                    class="p-5 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg text-center">
-                    <h3 class="text-sm text-gray-600 dark:text-gray-300">Saved Addresses</h3>
-                    <p class="text-3xl font-bold text-green-600 mt-1">0</p>
-                    {{-- <p class="text-3xl font-bold text-green-600 mt-1">{{ $addresses_count }}</p> --}}
-                </div>
-            </div>
+            <div class="space-y-5">
 
-            <div class="mt-8">
-                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3">Recent Orders</h3>
+                <!-- Name -->
+                <div
+                    class="flex justify-between items-center p-5 border rounded-lg bg-gray-50 dark:bg-slate-700 dark:border-slate-600">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Name</h3>
+                        <p class="text-gray-700 dark:text-gray-300">{{ $user->name }}</p>
+                    </div>
+                    <button wire:click="edit('name')"
+                        class="text-blue-600 hover:underline font-medium text-sm">EDIT</button>
+                </div>
 
-                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-700">
-                    <table class="min-w-full text-sm text-left text-gray-800 dark:text-gray-200">
-                        <thead class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200">
-                            <tr>
-                                <th class="px-4 py-3 font-medium uppercase">Order</th>
-                                <th class="px-4 py-3 font-medium uppercase">Date</th>
-                                <th class="px-4 py-3 font-medium uppercase">Status</th>
-                                <th class="px-4 py-3 font-medium uppercase text-end">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($recent_orders as $order)
-                            <tr
-                                class="border-t border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
-                                <td class="px-4 py-3">{{ $order->id }}</td>
-                                <td class="px-4 py-3">{{ $order->created_at->format('d M Y') }}</td>
-                                <td class="px-4 py-3">
-                                    <x-status-badge type="order" :status="$order->status" />
-                                </td>
-                                <td class="px-4 py-3 text-end font-medium">
-                                    {{ Number::currency($order->grand_total, 'USD') }}
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <!-- Email -->
+                <div
+                    class="flex justify-between items-center p-5 border rounded-lg bg-gray-50 dark:bg-slate-700 dark:border-slate-600">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Email</h3>
+                        <p class="text-gray-700 dark:text-gray-300">{{ $user->email }}</p>
+                    </div>
+                    <button wire:click="edit('email')"
+                        class="text-blue-600 hover:underline font-medium text-sm">EDIT</button>
+                </div>
+
+                <!-- Phone -->
+                <div
+                    class="flex justify-between items-center p-5 border rounded-lg bg-gray-50 dark:bg-slate-700 dark:border-slate-600">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Mobile Phone Number</h3>
+                        <p class="text-gray-700 dark:text-gray-300">+81 80-7521-0476</p>
+                    </div>
+                    <button wire:click="edit('phone')"
+                        class="text-blue-600 hover:underline font-medium text-sm">EDIT</button>
+                </div>
+
+                <!-- Password -->
+                <div
+                    class="flex justify-between items-center p-5 border rounded-lg bg-gray-50 dark:bg-slate-700 dark:border-slate-600">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Password</h3>
+                        <p class="text-gray-700 dark:text-gray-300">**********</p>
+                    </div>
+                    <button wire:click="edit('password')"
+                        class="text-blue-600 hover:underline font-medium text-sm">EDIT</button>
+                </div>
+
+                <!-- Passkey -->
+                <div
+                    class="flex justify-between items-center p-5 border rounded-lg bg-gray-50 dark:bg-slate-700 dark:border-slate-600">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Passkey</h3>
+                        <p class="text-gray-700 dark:text-gray-300">Not set </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Enhance security by setting up a
+                            passkey for passwordless login.</p>
+                    </div>
+                    <button wire:click="edit('passkey')"
+                        class="text-blue-600 hover:underline font-medium text-sm">SETTING</button>
+                </div>
+
+                <!-- Two-Factor Authentication -->
+                <div
+                    class="flex justify-between items-center p-5 border rounded-lg bg-gray-50 dark:bg-slate-700 dark:border-slate-600">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Two-factor-authentication
+                        </h3>
+                        <p class="text-gray-700 dark:text-gray-300">+81 80-7521-0476</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">You can sign in securely by entering an
+                            authentication code in addition to your password.</p>
+                    </div>
+                    <button wire:click="edit('2fa')"
+                        class="text-blue-600 hover:underline font-medium text-sm">SETTING</button>
+                </div>
+
+                <!-- Security notice -->
+                <div
+                    class="flex justify-between items-center p-5 border rounded-lg bg-gray-50 dark:bg-slate-700 dark:border-slate-600">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Has your account been
+                            accessed illegally?</h3>
+                        <p class="text-gray-700 dark:text-gray-300">You can sign out from all locations.
+                        </p>
+                    </div>
+                    <button class="text-blue-600 hover:underline font-medium text-sm">SETTING</button>
                 </div>
             </div>
         </section>
