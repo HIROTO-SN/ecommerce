@@ -92,7 +92,10 @@
                         <p class="text-gray-700 dark:text-gray-300">{{ $user->name }}</p>
                     </div>
                     <button wire:click="edit('name')"
-                        class="text-blue-600 hover:underline font-medium text-sm">EDIT</button>
+                        class="text-blue-600 hover:underline font-medium text-sm cursor-pointer">
+                        EDIT
+                    </button>
+
                 </div>
 
                 <!-- Email -->
@@ -103,7 +106,7 @@
                         <p class="text-gray-700 dark:text-gray-300">{{ $user->email }}</p>
                     </div>
                     <button wire:click="edit('email')"
-                        class="text-blue-600 hover:underline font-medium text-sm">EDIT</button>
+                        class="text-blue-600 hover:underline font-medium text-sm cursor-pointer">EDIT</button>
                 </div>
 
                 <!-- Phone -->
@@ -114,7 +117,7 @@
                         <p class="text-gray-700 dark:text-gray-300">+81 80-7521-0476</p>
                     </div>
                     <button wire:click="edit('phone')"
-                        class="text-blue-600 hover:underline font-medium text-sm">EDIT</button>
+                        class="text-blue-600 hover:underline font-medium text-sm cursor-pointer">EDIT</button>
                 </div>
 
                 <!-- Password -->
@@ -125,7 +128,7 @@
                         <p class="text-gray-700 dark:text-gray-300">**********</p>
                     </div>
                     <button wire:click="edit('password')"
-                        class="text-blue-600 hover:underline font-medium text-sm">EDIT</button>
+                        class="text-blue-600 hover:underline font-medium text-sm cursor-pointer">EDIT</button>
                 </div>
 
                 <!-- Passkey -->
@@ -138,7 +141,7 @@
                             passkey for passwordless login.</p>
                     </div>
                     <button wire:click="edit('passkey')"
-                        class="text-blue-600 hover:underline font-medium text-sm">SETTING</button>
+                        class="text-blue-600 hover:underline font-medium text-sm cursor-pointer">SETTING</button>
                 </div>
 
                 <!-- Two-Factor Authentication -->
@@ -152,7 +155,7 @@
                             authentication code in addition to your password.</p>
                     </div>
                     <button wire:click="edit('2fa')"
-                        class="text-blue-600 hover:underline font-medium text-sm">SETTING</button>
+                        class="text-blue-600 hover:underline font-medium text-sm cursor-pointer">SETTING</button>
                 </div>
 
                 <!-- Security notice -->
@@ -164,8 +167,42 @@
                         <p class="text-gray-700 dark:text-gray-300">You can sign out from all locations.
                         </p>
                     </div>
-                    <button class="text-blue-600 hover:underline font-medium text-sm">SETTING</button>
+                    <button class="text-blue-600 hover:underline font-medium text-sm cursor-pointer">SETTING</button>
                 </div>
+                <!-- モーダル -->
+                @if ($showModal)
+                <div class="fixed inset-0 flex items-center justify-center z-50">
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-sm" wire:click="$set('showModal', false)">
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-80 relative z-10">
+                        <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+                            Edit {{ ucfirst(str_replace('_', ' ', $field)) }}
+                        </h2>
+
+                        @if ($field === 'password')
+                        <input type="password" wire:model="value" placeholder="New Password"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 mb-3 text-gray-800 dark:text-gray-100">
+
+                        <input type="password" wire:model="password_confirmation" placeholder="Confirm Password"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 mb-4 text-gray-800 dark:text-gray-100">
+                        @else
+                        <input type="text" wire:model="value"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 mb-4 text-gray-800 dark:text-gray-100">
+                        @endif
+
+                        <div class="flex justify-end gap-2">
+                            <button wire:click="$set('showModal', false)"
+                                class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+
+                            <button wire:click="save"
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
         </section>
     </div>
