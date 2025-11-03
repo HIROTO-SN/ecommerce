@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
 use Livewire\WithFileUploads;
@@ -17,6 +18,12 @@ class MyAccountPage extends Component {
 
     public $photo;
     public $avatar_url;
+
+    // 編集モーダル用
+    public $showModal = false;
+    public $field;
+    public $value;
+    public $password_confirmation;
 
     protected $rules = [
         'photo' => 'nullable|image|max:2048',
@@ -65,6 +72,52 @@ class MyAccountPage extends Component {
 
         LivewireAlert::title( 'Success' )
         ->text( 'Your profile picture has been updated successfully!' )
+        ->position( 'center' )
+        ->timer( 2000 )
+        ->success()
+        ->show();
+    }
+
+    // ✅ 編集モーダルを開く
+
+    public function edit( $field ) {
+        $this->field = $field;
+        $user = auth()->user();
+
+        if ( $field === 'password' ) {
+            $this->value = '';
+            $this->password_confirmation = '';
+        } else {
+            $this->value = $user->$field;
+        }
+
+        $this->showModal = true;
+    }
+
+    // ✅ 保存処理
+
+    public function save() {
+        $user = auth()->user();
+
+        if ( $this->field === 'password' ) {
+            $this->validate( [
+                'value' => 'required|min:8',
+                'password_confirmation' => 'required|same:value',
+            ] );
+            $user->update( [ 'password' => Hash::make( $this->value ) ] );
+            $message = 'Password updated successfully!';
+        } else {
+            $this->validate( [
+                'value' => 'required|string|max:255',
+            ] );
+            $user->update( [ $this->field => $this->value ] );
+            $message = ucfirst( str_replace( '_', ' ', $this->field ) ) . ' updated successfully!';
+        }
+
+        $this->showModal = false;
+
+        LivewireAlert::title( 'Success' )
+        ->text( $message )
         ->position( 'center' )
         ->timer( 2000 )
         ->success()
