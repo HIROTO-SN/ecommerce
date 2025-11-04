@@ -114,7 +114,7 @@
                     class="flex justify-between items-center p-5 border rounded-lg bg-gray-50 dark:bg-slate-700 dark:border-slate-600">
                     <div>
                         <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Mobile Phone Number</h3>
-                        <p class="text-gray-700 dark:text-gray-300">+81 80-7521-0476</p>
+                        <p class="text-gray-700 dark:text-gray-300">{{ $user->phone }}</p>
                     </div>
                     <button wire:click="edit('phone')"
                         class="text-blue-600 hover:underline font-medium text-sm cursor-pointer">EDIT</button>
@@ -180,15 +180,34 @@
                             Edit {{ ucfirst(str_replace('_', ' ', $field)) }}
                         </h2>
 
+                        {{-- Password fields --}}
                         @if ($field === 'password')
-                        <input type="password" wire:model="value" placeholder="New Password"
-                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 mb-3 text-gray-800 dark:text-gray-100">
+                        <div class="mb-3">
+                            <input type="password" wire:model.defer="value" placeholder="New Password"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-gray-800 dark:text-gray-100">
+                            @error('value')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                        <input type="password" wire:model="password_confirmation" placeholder="Confirm Password"
-                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 mb-4 text-gray-800 dark:text-gray-100">
+                        <div class="mb-4">
+                            <input type="password" wire:model.defer="password_confirmation"
+                                placeholder="Confirm Password"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-gray-800 dark:text-gray-100">
+                            @error('password_confirmation')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Other fields --}}
                         @else
-                        <input type="text" wire:model="value"
-                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 mb-4 text-gray-800 dark:text-gray-100">
+                        <div class="mb-4">
+                            <input type="text" wire:model.defer="value"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-gray-800 dark:text-gray-100">
+                            @error('value')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                         @endif
 
                         <div class="flex justify-end gap-2">
