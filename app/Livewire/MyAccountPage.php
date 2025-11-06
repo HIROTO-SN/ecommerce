@@ -33,9 +33,6 @@ class MyAccountPage extends Component {
 
     public function render() {
         $user = auth()->user();
-        $rules = [
-            'photo' => 'nullable|image|max:2048'
-        ];
 
         if ( $user->avatar_url ) {
             $this->photo = $user->avatar_url;
@@ -52,7 +49,11 @@ class MyAccountPage extends Component {
     }
 
     public function updatedPhoto() {
-        $this->validate();
+        $rules = [
+            'photo' => 'nullable|image|max:2048'
+        ];
+
+        $this->validate( $rules );
         $user = User::find( auth()->id() );
 
         // 旧画像を削除（任意）
@@ -105,11 +106,6 @@ class MyAccountPage extends Component {
     public function save() {
         $user = auth()->user();
 
-        // ✅ 動的なバリデーションルール
-        $rules = [
-            'value' => 'required|string|max:255',
-        ];
-
         // バリデーションの切り替え
         if ( $this->field === 'email' ) {
             $this->validate( [ 'value' => 'required|email' ] );
@@ -126,7 +122,7 @@ class MyAccountPage extends Component {
                 ],
             ] );
         } else {
-            $this->validate( $rules );
+            $this->validate( $this->rules );
         }
 
         // ✅ 更新データを動的に生成
