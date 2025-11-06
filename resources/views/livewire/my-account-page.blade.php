@@ -171,7 +171,7 @@
                 </div>
                 <!-- モーダル -->
                 @if ($showModal)
-                <div class="fixed inset-0 flex items-center justify-center z-50">
+                <div class="fixed inset-0 flex items-center justify-center z-50" wire:keydown.enter="save" tabindex="0">
                     <div class="absolute inset-0 bg-white/20 backdrop-blur-sm" wire:click="$set('showModal', false)">
                     </div>
 
