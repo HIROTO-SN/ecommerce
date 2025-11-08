@@ -24,6 +24,7 @@ class MyAccountPage extends Component {
     public $field;
     public $value;
     public $password_confirmation;
+    public $passkeys = [];
 
     protected $rules = [
         'value' => 'required|string|max:255',
@@ -89,11 +90,13 @@ class MyAccountPage extends Component {
         $user = auth()->user();
 
         if ( $field === 'phone' ) {
-            // 表示時はハイフン付きに変換
             $this->value = $this->formatPhone( $user->phone );
-        } else if ( $field === 'password' ) {
+        } elseif ( $field === 'password' ) {
             $this->value = '';
             $this->password_confirmation = '';
+        } elseif ( $field === 'passkey' ) {
+            // ✅ パスキー専用モーダルを開く（登録済みパスキー一覧を取得）
+            $this->passkeys = $user->passkeys()->orderByDesc( 'last_used_at' )->get();
         } else {
             $this->value = $user->$field;
         }
