@@ -52,4 +52,8 @@ class User extends Authenticatable implements FilamentUser {
     public function canAccessPanel( Panel $panel ): bool {
         return $this->email == 'admin@gmail.com';
     }
+
+    public function passkeys() {
+        return $this->hasMany( Passkey::class );
+    }
 }
