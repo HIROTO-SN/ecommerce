@@ -156,6 +156,10 @@ class MyAccountPage extends Component {
 
     }
 
+    public function addPasskey() {
+        return;
+    }
+
     private function formatPhone( $number ) {
         if ( !$number ) return '';
 
