@@ -24,6 +24,7 @@ class MyAccountPage extends Component {
     public $field;
     public $value;
     public $password_confirmation;
+    public $passkeys = [];
 
     protected $rules = [
         'value' => 'required|string|max:255',
@@ -33,9 +34,6 @@ class MyAccountPage extends Component {
 
     public function render() {
         $user = auth()->user();
-        $rules = [
-            'photo' => 'nullable|image|max:2048'
-        ];
 
         if ( $user->avatar_url ) {
             $this->photo = $user->avatar_url;
@@ -52,7 +50,11 @@ class MyAccountPage extends Component {
     }
 
     public function updatedPhoto() {
-        $this->validate();
+        $rules = [
+            'photo' => 'nullable|image|max:2048'
+        ];
+
+        $this->validate( $rules );
         $user = User::find( auth()->id() );
 
         // 旧画像を削除（任意）
@@ -88,11 +90,13 @@ class MyAccountPage extends Component {
         $user = auth()->user();
 
         if ( $field === 'phone' ) {
-            // 表示時はハイフン付きに変換
             $this->value = $this->formatPhone( $user->phone );
-        } else if ( $field === 'password' ) {
+        } elseif ( $field === 'password' ) {
             $this->value = '';
             $this->password_confirmation = '';
+        } elseif ( $field === 'passkey' ) {
+            // ✅ パスキー専用モーダルを開く（登録済みパスキー一覧を取得）
+            $this->passkeys = $user->passkeys()->orderByDesc( 'last_used_at' )->get();
         } else {
             $this->value = $user->$field;
         }
@@ -104,11 +108,6 @@ class MyAccountPage extends Component {
 
     public function save() {
         $user = auth()->user();
-
-        // ✅ 動的なバリデーションルール
-        $rules = [
-            'value' => 'required|string|max:255',
-        ];
 
         // バリデーションの切り替え
         if ( $this->field === 'email' ) {
@@ -126,7 +125,7 @@ class MyAccountPage extends Component {
                 ],
             ] );
         } else {
-            $this->validate( $rules );
+            $this->validate( $this->rules );
         }
 
         // ✅ 更新データを動的に生成
@@ -155,6 +154,10 @@ class MyAccountPage extends Component {
         // ✅ 画面リフレッシュ（再読み込みやデータ更新用）
         $this->dispatch( 'user-updated' );
 
+    }
+
+    public function addPasskey() {
+        return;
     }
 
     private function formatPhone( $number ) {
