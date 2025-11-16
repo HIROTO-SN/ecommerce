@@ -1,5 +1,5 @@
 <div class="w-full max-w-6xl py-10 px-4 sm:px-6 lg:px-8 mx-auto">
-    <h1 class="text-4xl font-bold text-slate-500 dark:text-slate-100 mb-8 text-center">My Page</h1>
+    <h1 class="text-4xl font-bold text-slate-500 dark:text-slate-100 mb-8 text-center">MY PAGE</h1>
 
     <!-- Grid layout: Sidebar + Main Content -->
     <div class="grid md:grid-cols-3 gap-8">
@@ -80,7 +80,7 @@
         <!-- Main Content -->
         <section
             class="md:col-span-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-8">
-            <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-8">Login and Security</h2>
+            <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-8">LOGIN AND SECURITY</h2>
 
             <div class="space-y-5">
 
