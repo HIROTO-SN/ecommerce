@@ -2,12 +2,11 @@
 
 namespace App\Providers;
 
-use App\Services\MyGoogle2FA;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\Vite;
 use Filament\Support\Assets\Js;
 use Illuminate\Support\ServiceProvider;
-use PragmaRX\Google2FAQRCode\Google2FA;
+use Laravel\Fortify\TwoFactorAuthenticationProvider;
 
 class AppServiceProvider extends ServiceProvider {
     /**
@@ -15,7 +14,6 @@ class AppServiceProvider extends ServiceProvider {
     */
 
     public function register(): void {
-        $this->app->bind( Google2FA::class, MyGoogle2FA::class );
     }
 
     /**

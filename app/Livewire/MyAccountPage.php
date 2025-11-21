@@ -3,12 +3,15 @@
 namespace App\Livewire;
 
 use App\Models\User;
+use App\Providers\CustomTwoFactorProvider;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
 use Livewire\WithFileUploads;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Laravel\Fortify\TwoFactorAuthenticationProvider;
+use PragmaRX\Google2FAQRCode\Google2FA;
 
 #[ Title( 'My Account' ) ]
 
@@ -25,6 +28,10 @@ class MyAccountPage extends Component {
     public $value;
     public $password_confirmation;
     public $passkeys = [];
+    public $qrCode;
+    public $show2faInput = false;
+    public $twoFactorCode;
+    public $twoFactorEnabled;
 
     protected $rules = [
         'value' => 'required|string|max:255',
@@ -88,12 +95,23 @@ class MyAccountPage extends Component {
     public function edit( $field ) {
         $this->field = $field;
         $user = auth()->user();
+        $this->resetValidation();
 
         if ( $field === 'phone' ) {
             $this->value = $this->formatPhone( $user->phone );
         } elseif ( $field === 'password' ) {
             $this->value = '';
             $this->password_confirmation = '';
+        } elseif ( $field === '2fa' ) {
+            // Check if user already has 2FA enabled
+            $this->twoFactorEnabled = !empty( $user->two_factor_secret );
+
+            if ( !$this->twoFactorEnabled ) {
+                // Only generate QR if not enabled yet
+                $this->show2faInput = false;
+                $this->twoFactorCode = '';
+                $this->generateTwoFactorQr();
+            }
         } elseif ( $field === 'passkey' ) {
             // ✅ パスキー専用モーダルを開く（登録済みパスキー一覧を取得）
             $this->passkeys = $user->passkeys()->orderByDesc( 'last_used_at' )->get();
@@ -156,8 +174,72 @@ class MyAccountPage extends Component {
 
     }
 
-    public function addPasskey() {
-        return;
+    public function confirmTwoFactor() {
+        $this->validate( [
+            'twoFactorCode' => 'required|digits:6',
+        ] );
+
+        $user = auth()->user();
+
+        // Get secret from session ( not DB )
+        $secret = session( 'two_factor_temp_secret' );
+
+        if ( ! $secret ) {
+            $this->addError( 'twoFactorCode', 'Session expired. Please try again.' );
+            return;
+        }
+
+        $provider = app( CustomTwoFactorProvider::class );
+
+        // Validate code ( including extended window if you replaced provider )
+        $valid = $provider->verify( $secret, $this->twoFactorCode );
+
+        if ( ! $valid ) {
+            $this->addError( 'twoFactorCode', 'The code is invalid.' );
+            return;
+        }
+
+        // 2FA confirmed → now save in DB
+        $user->forceFill( [
+            'two_factor_secret' => encrypt( $secret ),
+            'two_factor_confirmed_at' => now(),
+        ] )->save();
+
+        // Remove temp secret from session
+        session()->forget( 'two_factor_temp_secret' );
+
+        session()->flash( 'success', 'Two-factor authentication has been enabled.' );
+    }
+
+    private function generateTwoFactorQr() {
+        $user = auth()->user();
+        $provider = app( TwoFactorAuthenticationProvider::class );
+        $google2fa = new Google2FA();
+
+        // Always generate new temporary secret for preview
+        $secret = session( 'two_factor_temp_secret' ) ?? $provider->generateSecretKey();
+        session( [ 'two_factor_temp_secret' => $secret ] );
+
+        // Generate QR from this temporary secret
+        $this->qrCode = $google2fa->getQRCodeInline(
+            config( 'app.name' ),
+            $user->email,
+            $secret
+        );
+    }
+
+    public function disableTwoFactor() {
+        $user = auth()->user();
+        $user->forceFill( [
+            'two_factor_secret' => null,
+            'two_factor_confirmed_at' => null,
+        ] )->save();
+
+        $this->twoFactorEnabled = false;
+        $this->show2faInput = false;
+        $this->twoFactorCode = '';
+
+        session()->flash( 'success', 'Two-factor authentication has been disabled.' );
     }
 
     private function formatPhone( $number ) {
@@ -171,6 +253,5 @@ class MyAccountPage extends Component {
         }
 
         return $number;
-        // フォーマットできない場合はそのまま
     }
 }
