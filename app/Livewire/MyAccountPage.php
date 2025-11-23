@@ -11,6 +11,7 @@ use Livewire\WithFileUploads;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Laravel\Fortify\TwoFactorAuthenticationProvider;
+use Livewire\Attributes\On;
 use PragmaRX\Google2FAQRCode\Google2FA;
 
 #[ Title( 'My Account' ) ]
@@ -37,7 +38,7 @@ class MyAccountPage extends Component {
         'value' => 'required|string|max:255',
     ];
 
-    protected $listeners = [ 'avatar-updated' => 'refreshUser' ];
+    protected $listeners = [ 'user-updated' => 'refreshUser' ];
 
     public function render() {
         $user = auth()->user();
@@ -54,6 +55,10 @@ class MyAccountPage extends Component {
             'recent_orders' => $user->orders()->latest()->take( 5 )->get(),
             'default_address' => $user->orders()->latest()->first()?->address,
         ] );
+    }
+
+    public function refreshUser() {
+        $this->user = auth()->user()->fresh();
     }
 
     public function updatedPhoto() {
@@ -77,7 +82,7 @@ class MyAccountPage extends Component {
         $user->save();
 
         // フロント再描画用イベント発火
-        $this->dispatch( 'avatar-updated' );
+        $this->dispatch( 'user-updated' );
 
         // 一時ファイルをリセット
         $this->photo = null;
@@ -120,58 +125,6 @@ class MyAccountPage extends Component {
         }
 
         $this->showModal = true;
-    }
-
-    // ✅ 保存処理
-
-    public function save() {
-        $user = auth()->user();
-
-        // バリデーションの切り替え
-        if ( $this->field === 'email' ) {
-            $this->validate( [ 'value' => 'required|email' ] );
-        } elseif ( $this->field === 'password' ) {
-            $this->validate( [
-                'value' => 'required|min:8|same:password_confirmation',
-            ] );
-        } elseif ( $this->field === 'phone' ) {
-            // 電話番号のバリデーション
-            $this->validate( [
-                'value' => [
-                    'required',
-                    'regex:/^0\d{1,4}-\d{1,4}-\d{4}$/', // ハイフンあり形式をチェック
-                ],
-            ] );
-        } else {
-            $this->validate( $this->rules );
-        }
-
-        // ✅ 更新データを動的に生成
-        $data = [
-            $this->field => $this->field === 'password'
-            ? Hash::make( $this->value )
-            : ( $this->field === 'phone'
-            ? preg_replace( '/-/', '', $this->value ) // ハイフン削除
-            : $this->value ),
-        ];
-
-        // ✅ データベース更新
-        $user->update( $data );
-
-        // ✅ モーダルを閉じる
-        $this->showModal = false;
-
-        // ✅ アラート表示
-        LivewireAlert::title( 'Success' )
-        ->text( ucfirst( str_replace( '_', ' ', $this->field ) ) . ' updated successfully!' )
-        ->position( 'center' )
-        ->timer( 2000 )
-        ->success()
-        ->show();
-
-        // ✅ 画面リフレッシュ（再読み込みやデータ更新用）
-        $this->dispatch( 'user-updated' );
-
     }
 
     public function confirmTwoFactor() {
@@ -240,6 +193,12 @@ class MyAccountPage extends Component {
         $this->twoFactorCode = '';
 
         session()->flash( 'success', 'Two-factor authentication has been disabled.' );
+    }
+
+    #[ On( 'close-modal' ) ]
+
+    public function closeModal() {
+        $this->showModal = false;
     }
 
     private function formatPhone( $number ) {
