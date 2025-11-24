@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Modals;
 
+use App\Providers\CustomTwoFactorProvider;
 use App\Services\AlertService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
@@ -73,6 +74,44 @@ class EditFieldModal extends Component {
         $this->twoFactorCode = $twoFactorCode;
         $this->qrCode = $qrCode;
 
+    }
+
+    public function confirmTwoFactor() {
+        $this->validate( [
+            'twoFactorCode' => 'required|digits:6',
+        ] );
+
+        $user = auth()->user();
+
+        // Get secret from session ( not DB )
+        $secret = session( 'two_factor_temp_secret' );
+
+        if ( ! $secret ) {
+            $this->addError( 'twoFactorCode', 'Session expired. Please try again.' );
+            return;
+        }
+
+        $provider = app( CustomTwoFactorProvider::class );
+
+        // Validate code ( including extended window if you replaced provider )
+        $valid = $provider->verify( $secret, $this->twoFactorCode );
+
+        if ( ! $valid ) {
+            $this->addError( 'twoFactorCode', 'The code is invalid.' );
+            return;
+        }
+
+        // 2FA confirmed → now save in DB
+        $user->forceFill( [
+            'two_factor_secret' => encrypt( $secret ),
+            'two_factor_confirmed_at' => now(),
+        ] )->save();
+
+        // Remove temp secret from session
+        session()->forget( 'two_factor_temp_secret' );
+
+        AlertService::success( $this->field );
+        $this->dispatch( 'close-modal' );
     }
 
     public function render() {

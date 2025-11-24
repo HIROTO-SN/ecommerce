@@ -4,12 +4,11 @@ namespace App\Livewire;
 
 use App\Models\User;
 use App\Providers\CustomTwoFactorProvider;
-use Illuminate\Support\Facades\Hash;
+use App\Services\AlertService;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
 use Livewire\WithFileUploads;
 use Livewire\Component;
-use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Laravel\Fortify\TwoFactorAuthenticationProvider;
 use Livewire\Attributes\On;
 use PragmaRX\Google2FAQRCode\Google2FA;
@@ -87,12 +86,7 @@ class MyAccountPage extends Component {
         // 一時ファイルをリセット
         $this->photo = null;
 
-        LivewireAlert::title( 'Success' )
-        ->text( 'Your profile picture has been updated successfully!' )
-        ->position( 'center' )
-        ->timer( 2000 )
-        ->success()
-        ->show();
+        AlertService::custom( 'Success', 'success', 'Your profile picture has been updated successfully!' );
     }
 
     // ✅ 編集モーダルを開く
@@ -126,6 +120,8 @@ class MyAccountPage extends Component {
 
         $this->showModal = true;
     }
+
+    #[ On( 'confirm-two-factor' ) ]
 
     public function confirmTwoFactor() {
         $this->validate( [
@@ -161,7 +157,8 @@ class MyAccountPage extends Component {
         // Remove temp secret from session
         session()->forget( 'two_factor_temp_secret' );
 
-        session()->flash( 'success', 'Two-factor authentication has been enabled.' );
+        AlertService::success( $this->field );
+        $this->showModal = false;
     }
 
     private function generateTwoFactorQr() {
@@ -192,7 +189,7 @@ class MyAccountPage extends Component {
         $this->show2faInput = false;
         $this->twoFactorCode = '';
 
-        session()->flash( 'success', 'Two-factor authentication has been disabled.' );
+        AlertService::warning( $this->field );
     }
 
     #[ On( 'close-modal' ) ]
