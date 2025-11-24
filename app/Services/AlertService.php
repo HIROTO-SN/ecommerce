@@ -7,7 +7,8 @@ use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 class AlertService
  {
     public static function success( string $field, ?string $message = null ) {
-        $text = $message ?? ucfirst( str_replace( '_', ' ', $field ) ) . ' updated successfully!';
+        $suffix = $message ?? 'updated successfully!';
+        $text = ucfirst( str_replace( '_', ' ', $field ) ) . ' ' . $suffix;
 
         LivewireAlert::title( 'Success' )
         ->text( $text )
@@ -18,7 +19,8 @@ class AlertService
     }
 
     public static function error( string $field, ?string $message = null ) {
-        $text = $message ?? ucfirst( str_replace( '_', ' ', $field ) ) . ' could not be updated.';
+        $suffix = $message ?? 'could not be updated.';
+        $text = ucfirst( str_replace( '_', ' ', $field ) ) . ' ' . $suffix;
 
         LivewireAlert::title( 'Error' )
         ->text( $text )
@@ -29,7 +31,8 @@ class AlertService
     }
 
     public static function warning( string $field, ?string $message = null ) {
-        $text = $message ?? ucfirst( str_replace( '_', ' ', $field ) ) . ' requires attention.';
+        $suffix = $message ?? 'requires attention.';
+        $text = ucfirst( str_replace( '_', ' ', $field ) ) . ' ' . $suffix;
 
         LivewireAlert::title( 'Warning' )
         ->text( $text )
@@ -40,7 +43,8 @@ class AlertService
     }
 
     public static function info( string $field, ?string $message = null ) {
-        $text = $message ?? ucfirst( str_replace( '_', ' ', $field ) ) . ' information.';
+        $suffix = $message ?? 'information.';
+        $text = ucfirst( str_replace( '_', ' ', $field ) ) . ' ' . $suffix;
 
         LivewireAlert::title( 'Info' )
         ->text( $text )
@@ -50,4 +54,15 @@ class AlertService
         ->show();
     }
 
-}
+    public static function custom( string $title, string $type = 'info', ?string $message = null, ?string $position = 'center', int $timer = 2000 ) {
+        LivewireAlert::title( ucfirst( $title ) )
+        ->text( $message ?? '' )
+        ->position( $position )
+        ->timer( $timer )
+        -> {
+            $type}
+            ()
+            ->show();
+        }
+
+    }
