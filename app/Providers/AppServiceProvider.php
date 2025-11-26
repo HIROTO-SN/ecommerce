@@ -6,6 +6,7 @@ use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\Vite;
 use Filament\Support\Assets\Js;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\TwoFactorAuthenticationProvider;
 
 class AppServiceProvider extends ServiceProvider {
     /**
@@ -13,7 +14,6 @@ class AppServiceProvider extends ServiceProvider {
     */
 
     public function register(): void {
-        //
     }
 
     /**

@@ -3,12 +3,15 @@
 namespace App\Livewire;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Providers\CustomTwoFactorProvider;
+use App\Services\AlertService;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
 use Livewire\WithFileUploads;
 use Livewire\Component;
-use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Laravel\Fortify\TwoFactorAuthenticationProvider;
+use Livewire\Attributes\On;
+use PragmaRX\Google2FAQRCode\Google2FA;
 
 #[ Title( 'My Account' ) ]
 
@@ -25,12 +28,16 @@ class MyAccountPage extends Component {
     public $value;
     public $password_confirmation;
     public $passkeys = [];
+    public $qrCode;
+    public $show2faInput = false;
+    public $twoFactorCode;
+    public $twoFactorEnabled;
 
     protected $rules = [
         'value' => 'required|string|max:255',
     ];
 
-    protected $listeners = [ 'avatar-updated' => 'refreshUser' ];
+    protected $listeners = [ 'user-updated' => 'refreshUser' ];
 
     public function render() {
         $user = auth()->user();
@@ -47,6 +54,10 @@ class MyAccountPage extends Component {
             'recent_orders' => $user->orders()->latest()->take( 5 )->get(),
             'default_address' => $user->orders()->latest()->first()?->address,
         ] );
+    }
+
+    public function refreshUser() {
+        $this->user = auth()->user()->fresh();
     }
 
     public function updatedPhoto() {
@@ -70,17 +81,12 @@ class MyAccountPage extends Component {
         $user->save();
 
         // フロント再描画用イベント発火
-        $this->dispatch( 'avatar-updated' );
+        $this->dispatch( 'user-updated' );
 
         // 一時ファイルをリセット
         $this->photo = null;
 
-        LivewireAlert::title( 'Success' )
-        ->text( 'Your profile picture has been updated successfully!' )
-        ->position( 'center' )
-        ->timer( 2000 )
-        ->success()
-        ->show();
+        AlertService::custom( 'Success', 'success', 'Your profile picture has been updated successfully!' );
     }
 
     // ✅ 編集モーダルを開く
@@ -88,12 +94,23 @@ class MyAccountPage extends Component {
     public function edit( $field ) {
         $this->field = $field;
         $user = auth()->user();
+        $this->resetValidation();
 
         if ( $field === 'phone' ) {
             $this->value = $this->formatPhone( $user->phone );
         } elseif ( $field === 'password' ) {
             $this->value = '';
             $this->password_confirmation = '';
+        } elseif ( $field === '2fa' ) {
+            // Check if user already has 2FA enabled
+            $this->twoFactorEnabled = !empty( $user->two_factor_secret );
+
+            if ( !$this->twoFactorEnabled ) {
+                // Only generate QR if not enabled yet
+                $this->show2faInput = false;
+                $this->twoFactorCode = '';
+                $this->generateTwoFactorQr();
+            }
         } elseif ( $field === 'passkey' ) {
             // ✅ パスキー専用モーダルを開く（登録済みパスキー一覧を取得）
             $this->passkeys = $user->passkeys()->orderByDesc( 'last_used_at' )->get();
@@ -104,60 +121,81 @@ class MyAccountPage extends Component {
         $this->showModal = true;
     }
 
-    // ✅ 保存処理
+    #[ On( 'confirm-two-factor' ) ]
 
-    public function save() {
+    public function confirmTwoFactor() {
+        $this->validate( [
+            'twoFactorCode' => 'required|digits:6',
+        ] );
+
         $user = auth()->user();
 
-        // バリデーションの切り替え
-        if ( $this->field === 'email' ) {
-            $this->validate( [ 'value' => 'required|email' ] );
-        } elseif ( $this->field === 'password' ) {
-            $this->validate( [
-                'value' => 'required|min:8|same:password_confirmation',
-            ] );
-        } elseif ( $this->field === 'phone' ) {
-            // 電話番号のバリデーション
-            $this->validate( [
-                'value' => [
-                    'required',
-                    'regex:/^0\d{1,4}-\d{1,4}-\d{4}$/', // ハイフンあり形式をチェック
-                ],
-            ] );
-        } else {
-            $this->validate( $this->rules );
+        // Get secret from session ( not DB )
+        $secret = session( 'two_factor_temp_secret' );
+
+        if ( ! $secret ) {
+            $this->addError( 'twoFactorCode', 'Session expired. Please try again.' );
+            return;
         }
 
-        // ✅ 更新データを動的に生成
-        $data = [
-            $this->field => $this->field === 'password'
-            ? Hash::make( $this->value )
-            : ( $this->field === 'phone'
-            ? preg_replace( '/-/', '', $this->value ) // ハイフン削除
-            : $this->value ),
-        ];
+        $provider = app( CustomTwoFactorProvider::class );
 
-        // ✅ データベース更新
-        $user->update( $data );
+        // Validate code ( including extended window if you replaced provider )
+        $valid = $provider->verify( $secret, $this->twoFactorCode );
 
-        // ✅ モーダルを閉じる
+        if ( ! $valid ) {
+            $this->addError( 'twoFactorCode', 'The code is invalid.' );
+            return;
+        }
+
+        // 2FA confirmed → now save in DB
+        $user->forceFill( [
+            'two_factor_secret' => encrypt( $secret ),
+            'two_factor_confirmed_at' => now(),
+        ] )->save();
+
+        // Remove temp secret from session
+        session()->forget( 'two_factor_temp_secret' );
+
+        AlertService::success( $this->field );
         $this->showModal = false;
-
-        // ✅ アラート表示
-        LivewireAlert::title( 'Success' )
-        ->text( ucfirst( str_replace( '_', ' ', $this->field ) ) . ' updated successfully!' )
-        ->position( 'center' )
-        ->timer( 2000 )
-        ->success()
-        ->show();
-
-        // ✅ 画面リフレッシュ（再読み込みやデータ更新用）
-        $this->dispatch( 'user-updated' );
-
     }
 
-    public function addPasskey() {
-        return;
+    private function generateTwoFactorQr() {
+        $user = auth()->user();
+        $provider = app( TwoFactorAuthenticationProvider::class );
+        $google2fa = new Google2FA();
+
+        // Always generate new temporary secret for preview
+        $secret = session( 'two_factor_temp_secret' ) ?? $provider->generateSecretKey();
+        session( [ 'two_factor_temp_secret' => $secret ] );
+
+        // Generate QR from this temporary secret
+        $this->qrCode = $google2fa->getQRCodeInline(
+            config( 'app.name' ),
+            $user->email,
+            $secret
+        );
+    }
+
+    public function disableTwoFactor() {
+        $user = auth()->user();
+        $user->forceFill( [
+            'two_factor_secret' => null,
+            'two_factor_confirmed_at' => null,
+        ] )->save();
+
+        $this->twoFactorEnabled = false;
+        $this->show2faInput = false;
+        $this->twoFactorCode = '';
+
+        AlertService::warning( $this->field );
+    }
+
+    #[ On( 'close-modal' ) ]
+
+    public function closeModal() {
+        $this->showModal = false;
     }
 
     private function formatPhone( $number ) {
@@ -171,6 +209,5 @@ class MyAccountPage extends Component {
         }
 
         return $number;
-        // フォーマットできない場合はそのまま
     }
 }

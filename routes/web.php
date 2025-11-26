@@ -16,6 +16,7 @@ use App\Livewire\ProductDetailPage;
 use App\Livewire\ProductsPage;
 use App\Livewire\SuccessPage;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,4 +54,11 @@ Route::middleware('auth')->group(function() {
   Route::get( '/my-account', MyAccountPage::class );
   Route::get( '/success', SuccessPage::class )->name('success');
   Route::get( '/cancel', CancelPage::class )->name('cancel');
+});
+
+Route::middleware(['web'])->group(function () {
+    Route::get('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'create'])
+        ->name('two-factor.login');
+
+    Route::post('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'store']);
 });
