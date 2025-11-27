@@ -4,6 +4,7 @@ use App\Livewire\Auth\ForgotPasswordPage;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\Auth\RegisterPage;
 use App\Livewire\Auth\ResetPasswordPage;
+use App\Livewire\Auth\TwoFactor\TwoFactorChallenge;
 use App\Livewire\CancelPage;
 use App\Livewire\CartPage;
 use App\Livewire\CategoriesPage;
@@ -56,9 +57,13 @@ Route::middleware('auth')->group(function() {
   Route::get( '/cancel', CancelPage::class )->name('cancel');
 });
 
-Route::middleware(['web'])->group(function () {
-    Route::get('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'create'])
-        ->name('two-factor.login');
+// Route::middleware(['web'])->group(function () {
+//     Route::get('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'create'])
+//         ->name('two-factor.login');
 
-    Route::post('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'store']);
-});
+//     Route::post('/two-factor-challenge', [TwoFactorAuthenticatedSessionController::class, 'store']);
+// });
+
+Route::get('/two-factor-challenge', TwoFactorChallenge::class)
+    ->middleware('guest')
+    ->name('two-factor.login');
