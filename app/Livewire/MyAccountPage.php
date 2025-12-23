@@ -178,6 +178,8 @@ class MyAccountPage extends Component {
         );
     }
 
+    #[ On( 'disableTwoFactor' ) ]
+
     public function disableTwoFactor() {
         $user = auth()->user();
         $user->forceFill( [

@@ -117,4 +117,5 @@ class EditFieldModal extends Component {
     public function render() {
         return view( 'livewire.modals.edit-field-modal' );
     }
+
 }
