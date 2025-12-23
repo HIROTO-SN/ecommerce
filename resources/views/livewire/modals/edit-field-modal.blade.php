@@ -74,14 +74,20 @@
                     </div>
 
                     <!-- ボタン -->
-                    <button wire:click="disableTwoFactor"
-                        class="flex items-center px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        Disable
-                    </button>
+                    <div x-data>
+                        <button @click.prevent="
+                                if (confirm('Are you sure you want to disable two-factor authentication?')) {
+                                    Livewire.dispatch('disableTwoFactor')
+                                }"
+                            class="flex items-center px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Disable
+                        </button>
+                    </div>
+
                 </div>
 
                 <!-- 下段：注釈 -->
