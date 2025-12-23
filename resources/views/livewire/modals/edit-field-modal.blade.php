@@ -78,6 +78,7 @@
                         <button @click.prevent="
                                 if (confirm('Are you sure you want to disable two-factor authentication?')) {
                                     Livewire.dispatch('disableTwoFactor')
+                                    $dispatch('close-modal')
                                 }"
                             class="flex items-center px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
